@@ -25,7 +25,7 @@ assignments = [
         task_type=TaskType.READING,
         due_date=today + timedelta(days=1),
         priority=3
-        # est_hours omitted; defaults to 0.1 (READING default)
+        # est_hours omitted; defaults to 1.0 (READING default)
     ),
     Assignment(
         title="Lab report draft",

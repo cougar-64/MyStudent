@@ -27,7 +27,7 @@ DEFAULT_HOURS: dict[TaskType, float] = {
 class Course:
     name: str # i.e Software Design
     code: str # i.e. CS 340
-    color: str = '888' # used for UI color later
+    color: str = '#888' # used for UI color later
 
 
 @dataclass

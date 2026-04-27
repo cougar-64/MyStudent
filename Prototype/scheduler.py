@@ -31,7 +31,7 @@ def build_schedule(assignments: list[Assignment], daily_hours: dict[date, float]
     # --- 2. Build empty day slots -----------------------------
     sorted_dates = sorted(daily_hours.keys())
     days: dict[date, DaySchedule] = {
-        d: DaySchedule(date=d, availabile_hours=daily_hours[d]) for d in sorted_dates
+        d: DaySchedule(date=d, available_hours=daily_hours[d]) for d in sorted_dates
     }
 
     # --- 3. Spread each assignment's hours across available days -----------------------------
@@ -58,8 +58,8 @@ def build_schedule(assignments: list[Assignment], daily_hours: dict[date, float]
             slot = days[d]
             allocated = min(hours_per_day, slot.hours_remaining, hours_left)
             if allocated > 0:
-                slot.blocks.append(Block(assignment=assignments, hours=round(allocated, 2)))
-                hours_left = -allocated
+                slot.blocks.append(Block(assignment=assignment, hours=round(allocated, 2)))
+                hours_left -= allocated
 
         # Second pass: fill any hours that didn't fit the even spread
         if hours_left > 0.01:
@@ -79,7 +79,7 @@ def build_schedule(assignments: list[Assignment], daily_hours: dict[date, float]
                         slot.blocks.append(Block(assignment=assignment, hours=round(extra, 2)))
                     hours_left -= extra
 
-        return [days[d] for d in sorted_dates]
+    return [days[d] for d in sorted_dates]
 
 
 
