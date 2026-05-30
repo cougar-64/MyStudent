@@ -27,12 +27,13 @@ DEFAULT_HOURS: dict[TaskType, float] = {
 class Course:
     name: str # i.e Software Design
     code: str # i.e. CS 340
+    weekly_hours: float = 3
     color: str = '#888' # used for UI color later
 
 
 @dataclass
 class Assignment:
-    title: str
+    title: st
     course: Course
     task_type: TaskType
     due_date: date
@@ -75,3 +76,18 @@ class DaySchedule:
     @property
     def hours_remaining(self):
         return max(0.0, self.available_hours - self.hours_scheduled)
+
+
+
+@dataclass
+class Semester:
+    name: str
+    start_date: date
+    end_date: date
+    courses: list[Course] = field(default_factory=list)
+
+    def weekly_hours_for(self, course: Course) -> float:
+        return course.weekly_hours
+
+    def total_weeks(self) -> int:
+        return ((self.end_date - self.start_date).days // 7) + 1
