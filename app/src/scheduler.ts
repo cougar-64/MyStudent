@@ -36,6 +36,39 @@ export function generateDailyHours(semester: Semester): Record<string, number> {
 
 
 export function buildSchedule(assignments: Assignment[], dailyHours: Record<string, number>): DaySchedule[] {
-    let today = Math.min(...Object.keys(dailyHours).map(Number));
-    const x = 5
+    let today = Object.keys(dailyHours).sort()[0];
+    let active: Assignment[] = [];
+    for (let i = 0; i <assignments.length; i++) {
+        if (assignments[i].dueDate > today) {
+            active.push(assignments[i]);
+        }
+    }
+    function urgency(a: Assignment): number {
+        const daysLeft = (new Date(a.dueDate).getTime() - new Date(today).getTime()) / (1000 * 60 * 60 * 24)
+        return daysLeft - (a.priority * 0.5)
+    }
+    active.sort((a, b) => urgency(a) - urgency(b))
+    const sortedDates = Object.keys(dailyHours).sort();
+    const days: Record<string, DaySchedule> = {};
+    for (const d of sortedDates) {
+        days[d] = {
+            date: d,
+            availableHours: dailyHours[d],
+            blocks: []
+        }
+    }
+    for (const assignment of active) {
+        let hoursLeft = assignment.estHours ?? DEFAULT_HOURS[assignment.taskType];
+        let eligibleDays = [];
+        for (const d of sortedDates) {
+            const hoursRemaining = days[d].availableHours - days[d].blocks.reduce((sum, b) => sum + b.hours, 0);
+            if (d <= assignment.dueDate && hoursRemaining > 0) {
+                eligibleDays.push(d);
+            }
+        }
+        if (eligibleDays.length === 0) {
+            continue;
+        }
+
+    }
 }
