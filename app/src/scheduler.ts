@@ -69,6 +69,31 @@ export function buildSchedule(assignments: Assignment[], dailyHours: Record<stri
         if (eligibleDays.length === 0) {
             continue;
         }
-
+        const weights = eligibleDays.map((_, i) => i + 1);
+        const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+        for (let i = 0; i < eligibleDays.length; i++) {
+            const d = eligibleDays[i];
+            if (hoursLeft <= 0) {
+                break;
+            }
+            let slot = days[d];
+            let proportional = (weights[i] / totalWeight) * (assignment.estHours ?? DEFAULT_HOURS[assignment.taskType]);
+            let isDueDate = (d === assignment.dueDate)
+            let dailyCap = null;
+            if (isDueDate) {
+                dailyCap = MIN_SESSION
+            }
+            else {
+                dailyCap = MAX_SINGLE_DAY;
+            }
+            let allocated = Math.min(proportional, slot.availableHours - slot.blocks.reduce((sum, b) => sum + b.hours, 0), hoursLeft, dailyCap);
+            if (allocated >= MIN_SESSION) {
+                slot.blocks.push({
+                    assignment: assignment,
+                    hours: Math.round(allocated * 100) / 100
+                });
+                hoursLeft -= allocated;
+            }
+        }
     }
 }
