@@ -19,13 +19,13 @@ export function generateDailyHours(semester: Semester): Record<string, number> {
     for (let i = 0; i < semester.courses.length; i++) {
         totalWeeklyHours += semester.courses[i].weeklyHours;
     }
-    let hoursPerWeekday = totalWeeklyHours / 5;
-    let daily: Record<string, number> = {};
+    const hoursPerWeekday = totalWeeklyHours / 5;
+    const daily: Record<string, number> = {};
     const current = new Date(semester.startDate);
     const end = new Date(semester.endDate);
     while (current < end) {
         const day = current.getDay();
-        if (day != 0 && day != 6) {
+        if (day !== 0 && day !== 6) {
             const key = current.toISOString().split('T')[0];
             daily[key] = Math.round(hoursPerWeekday * 100) / 100;
         }
@@ -76,9 +76,9 @@ export function buildSchedule(assignments: Assignment[], dailyHours: Record<stri
             if (hoursLeft <= 0) {
                 break;
             }
-            let slot = days[d];
-            let proportional = (weights[i] / totalWeight) * (assignment.estHours ?? DEFAULT_HOURS[assignment.taskType]);
-            let isDueDate = (d === assignment.dueDate)
+            const slot = days[d];
+            const proportional = (weights[i] / totalWeight) * (assignment.estHours ?? DEFAULT_HOURS[assignment.taskType]);
+            const isDueDate = (d === assignment.dueDate)
             let dailyCap = null;
             if (isDueDate) {
                 dailyCap = MIN_SESSION
@@ -95,5 +95,28 @@ export function buildSchedule(assignments: Assignment[], dailyHours: Record<stri
                 hoursLeft -= allocated;
             }
         }
+        if (hoursLeft > 0.01) {
+            for (const d of eligibleDays) {
+                if (hoursLeft <= 0) {
+                    break;
+                }
+                let slot = days[d];
+                const extra = Math.min(slot.availableHours - slot.blocks.reduce((sum, b) => sum + b.hours, 0), hoursLeft)
+                if (extra >= MIN_SESSION) {
+                    const existing = slot.blocks.find(b => b.assignment === assignment);
+                    if (existing) {
+                        existing.hours = Math.round((existing.hours + extra) * 100) / 100;
+                    }
+                    else {
+                        slot.blocks.push({
+                            assignment: assignment,
+                            hours: Math.round(extra * 100) / 100
+                        })
+                    }
+                    hoursLeft -= extra;
+                }
+            }
+        }
     }
+    return sortedDates.map(d => days[d]);
 }
