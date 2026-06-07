@@ -25,10 +25,11 @@ export function generateDailyHours(semester: Semester): Record<string, number> {
     const end = new Date(semester.endDate);
     while (current < end) {
         const day = current.getDay();
-        if (day !== 0 && day !== 6) {
-            const key = current.toISOString().split('T')[0];
-            daily[key] = Math.round(hoursPerWeekday * 100) / 100;
-        }
+        const key = current.toISOString().split('T')[0];
+        const isWeekend = day === 0 || day === 6;
+        daily[key] = isWeekend
+            ? Math.round((hoursPerWeekday * 0.5) * 100) / 100
+            : Math.round(hoursPerWeekday * 100) / 100;
         current.setDate(current.getDate() + 1);
     }
     return daily
