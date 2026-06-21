@@ -3,9 +3,10 @@ import { useState } from "react";
 
 interface WeekViewProps {
     schedule: DaySchedule[];
+    onToggleComplete: (title: string) => void;
 }
 
-export function WeekView({ schedule }: WeekViewProps) {
+export function WeekView({ schedule, onToggleComplete }: WeekViewProps) {
     const [weekOffset, setWeekOffset] = useState(0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -71,9 +72,20 @@ export function WeekView({ schedule }: WeekViewProps) {
                                             marginBottom: "0.4rem",
                                             color: "#fff",
                                             fontSize: "0.8rem",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "0.4 rem",
+                                            textDecoration: block.assignment.completed ? "line-through" : "none",
                                         }}
                                     >
-                                        <strong>{block.hours}h</strong> {block.assignment.title}
+                                        <input
+                                            type="checkbox"
+                                            checked={block.assignment.completed}
+                                            onChange={() => onToggleComplete(block.assignment.title)}
+                                            />
+                                        <span>
+                                            <strong>{block.hours}h</strong> {block.assignment.title}
+                                        </span>
                                     </div>
                                 ))
                             )}
